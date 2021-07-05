@@ -36,6 +36,14 @@
 					    	<label>Tu Canal de Transmisión</label>
 					    	<input  class="form-control form-control-sm small" :value="channel" disabled title="Con este canal otras personas pueden enviarte mensajes.">
 					    </p>
+					    <p class="card-text text-left small">
+					    	<label>Subscription</label>
+					    	<input  class="form-control form-control-sm small" :value="sub+channel" disabled title="Con este canal otras personas pueden enviarte mensajes.">
+					    </p>
+					    <p class="card-text text-left small">
+					    	<label>Transmisión</label>
+					    	<input  class="form-control form-control-sm small" :value="send+channelDestination" disabled title="Con este canal otras personas pueden enviarte mensajes.">
+					    </p>
 					    <p class="card-text text-left">
 					    	<span class="small font-weight-bold">Status</span>: 
 					    	<span v-if="socket != null" class="small badge badge-success">Conected</span>
@@ -68,6 +76,10 @@
 						    <p class="card-text text-left small">
 						    	<label>Recurso para la transmisión</label>
 						    	<input class="form-control form-control-sm" v-model="send" placeholder="/app/notification/">
+						    </p>
+						    <p class="card-text text-left small">
+						    	<label>Canal para la transmisión</label>
+						    	<input class="form-control form-control-sm" v-model="channel" placeholder="canal personalizado.">
 						    </p>
 						    <p class="card-text text-left small">
 						    	<label>Tu Usuario: </label>
@@ -139,7 +151,7 @@
 			el: "#app",
 			data: {
 				url: "ws://localhost:8004/websocket",
-				channel: "",
+				channel: null,
 				sub: "/topic/notification/",
 				send: "/app/notification/",
 				mensaje: "",
@@ -152,12 +164,14 @@
 			},
 			methods: {
 				conectar(){
-					this.channel = this.generateUUID;
+					if(this.channel == ""){
+						this.channel = this.generateUUID;
+					}
 					if(this.socket == null){
 						this.socket = new WebSocket(this.url);
 				        this.stompClient = Stomp.over(this.socket);
 				        let instance = this;
-				        this.stompClient.debug = () => {};
+				        //this.stompClient.debug = () => {};
 				        this.stompClient.connect({}, ( frame ) => {
 				            instance.stompClient.subscribe(instance.sub + instance.channel, ( messageOutput ) => {
 				            	instance.mensajes.push(JSON.parse(messageOutput.body));
@@ -185,7 +199,7 @@
 			        	username: instance.username,
 			        	message: instance.mensaje
 			        }
-			        stompClient.debug = () => {};
+			        //stompClient.debug = () => {};
 			        stompClient.connect({}, ( frame ) => {
 			            stompClient.send(instance.send + instance.channelDestination, {},JSON.stringify(dataJson));
 			            (stompClient != null) ? stompClient.disconnect() : console.log('Not Disconnected');
