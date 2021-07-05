@@ -17,7 +17,9 @@
 			<br>
 			<div class="row justify-content-center" v-if="socket != null">
 				<div v-if="configHidden == true">
+					<span @click="desconectar()" style="cursor: pointer;" class="small badge badge-danger">Desconectar</span>
 					<span @click="ocultarConfiguracion()" class="small badge badge-success" style="cursor: pointer;">Mostrar Configuración</span>
+					<span class="small badge badge-secondary">Channel: {{channel}}</span>
 				</div>
 				<div class="col-12" v-if="configHidden == false">
 					<div class="card bg-light mb-3" style="max-width: 25rem;">
@@ -57,7 +59,15 @@
 						    <div>
 						    <p class="card-text text-left small">
 						    	<label>Url del websocket</label>
-						    	<input class="form-control form-control-sm"  placeholder="ws://localhost:8004/websocket">
+						    	<input class="form-control form-control-sm" v-model="url" placeholder="ws://localhost:8004/websocket">
+						    </p>
+						    <p class="card-text text-left small">
+						    	<label>Recurso para la subscripción</label>
+						    	<input class="form-control form-control-sm" v-model="sub" placeholder="/topic/notification/">
+						    </p>
+						    <p class="card-text text-left small">
+						    	<label>Recurso para la transmisión</label>
+						    	<input class="form-control form-control-sm" v-model="send" placeholder="/app/notification/">
 						    </p>
 						    <p class="card-text text-left small">
 						    	<label>Tu Usuario: </label>
@@ -130,6 +140,8 @@
 			data: {
 				url: "ws://localhost:8004/websocket",
 				channel: "",
+				sub: "/topic/notification/",
+				send: "/app/notification/",
 				mensaje: "",
 				username: "",
 				channelDestination:"",
@@ -147,7 +159,7 @@
 				        let instance = this;
 				        this.stompClient.debug = () => {};
 				        this.stompClient.connect({}, ( frame ) => {
-				            instance.stompClient.subscribe('/topic/notification/' + instance.channel, ( messageOutput ) => {
+				            instance.stompClient.subscribe(instance.sub + instance.channel, ( messageOutput ) => {
 				            	instance.mensajes.push(JSON.parse(messageOutput.body));
 				            });
 				        });
@@ -175,7 +187,7 @@
 			        }
 			        stompClient.debug = () => {};
 			        stompClient.connect({}, ( frame ) => {
-			            stompClient.send("/app/notification/" + instance.channelDestination, {},JSON.stringify(dataJson));
+			            stompClient.send(instance.send + instance.channelDestination, {},JSON.stringify(dataJson));
 			            (stompClient != null) ? stompClient.disconnect() : console.log('Not Disconnected');
 			        });
 				}
