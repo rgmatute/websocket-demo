@@ -10,9 +10,11 @@ import com.rgmatute.notification.web.ws.util.Utils;
 
 @Controller
 public class MessageResource {
+	
 	@MessageMapping("/notification/{channelId}")
 	@SendTo("/topic/notification/{channelId}")
 	public Object messenger(MessageDTO request, @DestinationVariable String channelId) {
+		System.out.println("ok, " + request.toString());
 		
 		MessageResponse response = new MessageResponse();
 		response.setMessage(request.getMessage());
@@ -21,4 +23,11 @@ public class MessageResource {
 		
 		return response;
 	}
+	
+	@MessageMapping
+	@SendTo
+	public Object messenger(Object request) {
+		return request;
+	}
+	
 }
